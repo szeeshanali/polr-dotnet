@@ -38,9 +38,12 @@ public sealed class PolrNetOptions
     public bool AnonymousApi { get; set; }
     public int AnonymousApiQuota { get; set; } = 5;
 
-    /// <summary>Random endings (e.g. "aZ3kd") instead of counter based ones (e.g. "5kq").</summary>
-    public bool RandomEndings { get; set; }
-    public int RandomEndingLength { get; set; } = 5;
+    /// <summary>
+    /// Random endings (e.g. "aZ3kdQ") that cannot be guessed. Set to false for counter based endings
+    /// (e.g. "5kq"), which are shorter but sequential, so anyone can walk through every link.
+    /// </summary>
+    public bool RandomEndings { get; set; } = true;
+    public int RandomEndingLength { get; set; } = 6;
 
     /// <summary>Alphabet size for counter based endings: 32 (lowercase) or 62 (mixed case).</summary>
     public int EndingBase { get; set; } = 32;
@@ -52,7 +55,8 @@ public sealed class PolrNetOptions
     /// <summary>Path to a MaxMind GeoLite2-Country.mmdb file. Empty disables country lookups.</summary>
     public string? GeoIpDatabasePath { get; set; }
 
-    public int SecretKeyBytes { get; set; } = 2;
+    /// <summary>Random bytes in a secret link's key (shown as twice as many hex characters).</summary>
+    public int SecretKeyBytes { get; set; } = 8;
     public int ApiKeyBytes { get; set; } = 15;
 
     /// <summary>How long a resolved link stays in memory. Edits on another instance show up after at most this long.</summary>

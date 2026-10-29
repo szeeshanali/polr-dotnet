@@ -31,7 +31,7 @@ services:
     volumes:
       - mysql:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-ppolr-password", "-upolrnet"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-ppolrnet-password", "-upolrnet"]
       interval: 5s
       retries: 20
     restart: unless-stopped

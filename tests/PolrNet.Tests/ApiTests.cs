@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using PolrNet.Data;
 
@@ -30,6 +31,18 @@ public sealed class ApiTests(PolrNetFactory factory)
     {
         var shortUrl = await ShortenAsync($"url={Uri.EscapeDataString(NewUrl())}");
         Assert.StartsWith(PolrNetFactory.BaseUrl + "/", shortUrl);
+    }
+
+    [Fact]
+    public async Task New_links_get_random_endings() =>
+        Assert.Matches("^[A-Za-z0-9]{6}$", Ending(await ShortenAsync($"url={Uri.EscapeDataString(NewUrl())}")));
+
+    [Fact]
+    public async Task Sequential_endings_can_be_turned_back_on()
+    {
+        using var sequential = factory.WithWebHostBuilder(host => host.UseSetting("PolrNet:RandomEndings", "false"));
+        var shortUrl = await sequential.CreateClient().GetStringAsync($"/api/v2/action/shorten?url={Uri.EscapeDataString(NewUrl())}");
+        Assert.Matches("^[0-9a-v]+$", Ending(shortUrl));
     }
 
     [Fact]
