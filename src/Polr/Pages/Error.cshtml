@@ -1,0 +1,22 @@
+@page "/error"
+@attribute [Microsoft.AspNetCore.Mvc.IgnoreAntiforgeryToken]
+@* Rendered for error status codes (UseStatusCodePagesWithReExecute) and unhandled exceptions. *@
+@{
+    var code = HttpContext.Response.StatusCode;
+    var (title, message) = code switch
+    {
+        404 => ("Not found", "Sorry, that link or page does not exist."),
+        403 => ("Access denied", "You do not have access to this link or page."),
+        410 => ("Link disabled", "Sorry, but this link has been disabled by an administrator."),
+        500 => ("Something went wrong", "An unexpected error occurred. Please try again later."),
+        _ => ("Error", "Something went wrong."),
+    };
+    ViewData["Title"] = title;
+}
+
+<div class="text-center py-5">
+    <div class="display-1 fw-bold text-body-tertiary">@code</div>
+    <h1 class="h3">@title</h1>
+    <p class="text-body-secondary">@message</p>
+    <a href="/" class="btn btn-primary">Go home</a>
+</div>

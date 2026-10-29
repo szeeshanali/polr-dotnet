@@ -1,0 +1,9 @@
+@* Messages set with TempData["Error"] / TempData["Success"], in this request or the one before a redirect. *@
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success" role="alert">@success</div>
+}

@@ -1,0 +1,94 @@
+@model Polr.Pages.Admin.IndexModel
+
+<div class="d-flex flex-wrap gap-3 justify-content-between mb-3">
+    <form method="get" class="d-flex gap-2" role="search" style="max-width: 32rem">
+        <input type="hidden" name="tab" value="users">
+        <input type="search" name="q" value="@Model.Q" class="form-control" placeholder="Search users" aria-label="Search users">
+        <button class="btn btn-outline-secondary">Search</button>
+    </form>
+    <details>
+        <summary class="btn btn-primary">Add a user</summary>
+        <form method="post" asp-page-handler="AddUser" asp-all-route-data="Model.State" class="card card-body shadow-sm mt-2">
+            <input name="username" class="form-control mb-2" placeholder="Username" pattern="[A-Za-z0-9_\-]+" required aria-label="Username">
+            <input name="email" type="email" class="form-control mb-2" placeholder="Email" required aria-label="Email">
+            <input name="password" type="password" class="form-control mb-2" placeholder="Password" minlength="8" autocomplete="new-password" required aria-label="Password">
+            <select name="role" class="form-select mb-2" aria-label="Role">
+                <option value="">User</option>
+                <option value="admin">Admin</option>
+            </select>
+            <button class="btn btn-primary">Create user</button>
+        </form>
+    </details>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>Role</th>
+                <th>API</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model.Users!.Items)
+            {
+                var self = user.Id == Model.Me.Id;
+                <tr>
+                    <td>
+                        @user.Username
+                        <div class="small text-body-secondary">@user.Email</div>
+                    </td>
+                    <td class="text-nowrap">@user.CreatedAt?.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        <form method="post" asp-page-handler="ToggleUser" asp-all-route-data="Model.State">
+                            <input type="hidden" name="id" value="@user.Id">
+                            <button class="btn btn-sm @(user.Active ? "btn-outline-success" : "btn-outline-secondary")" disabled="@self">@(user.Active ? "Active" : "Inactive")</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="post" asp-page-handler="SetRole" asp-all-route-data="Model.State">
+                            <input type="hidden" name="id" value="@user.Id">
+                            <select name="role" class="form-select form-select-sm" onchange="this.form.submit()" disabled="@self" aria-label="Role">
+                                <option value="" selected="@(!user.IsAdmin)">User</option>
+                                <option value="admin" selected="@user.IsAdmin">Admin</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td class="api-cell">
+                        <div class="d-flex flex-wrap gap-1">
+                            <form method="post" asp-page-handler="ToggleApi" asp-all-route-data="Model.State">
+                                <input type="hidden" name="id" value="@user.Id">
+                                <button class="btn btn-sm @(user.ApiActive ? "btn-outline-success" : "btn-outline-secondary")">@(user.ApiActive ? "On" : "Off")</button>
+                            </form>
+                            <form method="post" asp-page-handler="NewApiKey" asp-all-route-data="Model.State">
+                                <input type="hidden" name="id" value="@user.Id">
+                                <button class="btn btn-sm btn-outline-secondary">New key</button>
+                            </form>
+                            <form method="post" asp-page-handler="SetQuota" asp-all-route-data="Model.State" class="d-flex gap-1">
+                                <input type="hidden" name="id" value="@user.Id">
+                                <input type="number" name="quota" value="@user.ApiQuota" class="form-control form-control-sm quota" title="Links per minute; negative means unlimited" aria-label="API quota">
+                                <button class="btn btn-sm btn-outline-secondary">Set</button>
+                            </form>
+                        </div>
+                        @if (user.ApiKey is { Length: > 0 })
+                        {
+                            <code class="small d-block mt-1">@user.ApiKey</code>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <form method="post" asp-page-handler="DeleteUser" asp-all-route-data="Model.State" onsubmit="return confirm('Delete this user? Their links are kept.')">
+                            <input type="hidden" name="id" value="@user.Id">
+                            <button class="btn btn-sm btn-outline-danger" disabled="@self">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<partial name="_Pager" />

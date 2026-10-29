@@ -1,0 +1,41 @@
+# Quick start: docker compose up -d, then open http://localhost:8080 and sign in as admin.
+# Change every password below before exposing this to the internet.
+services:
+  polr:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      ConnectionStrings__Polr: "Server=mysql;Database=polr;User ID=polr;Password=polr-password"
+      Polr__BaseUrl: "http://localhost:8080"
+      Polr__AdvancedAnalytics: "true"
+      Polr__Admin__Username: "admin"
+      Polr__Admin__Email: "admin@example.com"
+      Polr__Admin__Password: "change-me-please"
+      # Uncomment when running behind a reverse proxy (nginx, Traefik, Caddy...), so client IPs and HTTPS are detected.
+      # ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+    volumes:
+      - keys:/keys
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: polr
+      MYSQL_USER: polr
+      MYSQL_PASSWORD: polr-password
+      MYSQL_ROOT_PASSWORD: root-password
+    volumes:
+      - mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-ppolr-password", "-upolr"]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  mysql:
+  keys:

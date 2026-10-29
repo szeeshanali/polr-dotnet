@@ -1,0 +1,86 @@
+@page "/admin/stats/{ending}"
+@model Polr.Pages.Admin.StatsModel
+@using System.Text.Json
+@{
+    ViewData["Title"] = $"Stats for /{Model.Link.ShortUrl}";
+
+    void StatTable(string title, IReadOnlyList<(string Label, long Clicks)> rows)
+    {
+        var max = rows.Count == 0 ? 1 : rows.Max(r => r.Clicks);
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="h6">@title</h2>
+                @if (rows.Count == 0)
+                {
+                    <p class="text-body-secondary small mb-0">Nothing to show for this period.</p>
+                }
+                <table class="table table-sm align-middle mb-0">
+                    @foreach (var row in rows)
+                    {
+                        <tr>
+                            <td class="w-50 text-break">@row.Label</td>
+                            <td><div class="progress" style="height: .5rem"><div class="progress-bar" style="width: @(row.Clicks * 100 / max)%"></div></div></td>
+                            <td class="text-end">@row.Clicks</td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+    }
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div class="text-break">
+        <h1 class="h3 mb-1">Stats for <a href="@Options.BaseUrl/@Model.Link.ShortUrl">/@Model.Link.ShortUrl</a></h1>
+        <div class="text-body-secondary">→ @Model.Link.LongUrl</div>
+    </div>
+    <form method="get" class="d-flex gap-2 align-items-end">
+        <div>
+            <label asp-for="From" class="form-label small mb-1"></label>
+            <input asp-for="From" type="date" class="form-control form-control-sm">
+        </div>
+        <div>
+            <label asp-for="To" class="form-label small mb-1"></label>
+            <input asp-for="To" type="date" class="form-control form-control-sm">
+        </div>
+        <button class="btn btn-sm btn-primary">Update</button>
+    </form>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-6 col-md-3">
+        <div class="card card-body shadow-sm">
+            <div class="small text-body-secondary">Clicks in this period</div>
+            <div class="fs-3 fw-semibold">@Model.Days.Sum(d => d.Y)</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card card-body shadow-sm">
+            <div class="small text-body-secondary">All-time clicks</div>
+            <div class="fs-3 fw-semibold">@Model.Link.Clicks</div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <h2 class="h6">Clicks per day</h2>
+        <canvas id="day-chart" height="90" aria-label="Clicks per day"></canvas>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        @{ StatTable("Countries", Model.Countries.Select(c => (Polr.Pages.Admin.StatsModel.CountryName(c.Label), c.Clicks)).ToList()); }
+    </div>
+    <div class="col-md-6">
+        @{ StatTable("Referrers", Model.Referers.Select(r => (r.Label, r.Clicks)).ToList()); }
+    </div>
+</div>
+
+<script id="day-data" type="application/json">@Html.Raw(JsonSerializer.Serialize(Model.Days))</script>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="~/js/stats.js" asp-append-version="true"></script>
+}

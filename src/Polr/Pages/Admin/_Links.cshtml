@@ -1,0 +1,86 @@
+@model Polr.Pages.Admin.IndexModel
+@{
+    var all = Model.Tab == "all-links";
+}
+
+<form method="get" class="d-flex gap-2 mb-3" role="search" style="max-width: 32rem">
+    <input type="hidden" name="tab" value="@Model.Tab">
+    <input type="search" name="q" value="@Model.Q" class="form-control" placeholder="Search endings and URLs" aria-label="Search links">
+    <button class="btn btn-outline-secondary">Search</button>
+</form>
+
+@if (Model.Links!.Items.Count == 0)
+{
+    <p class="text-body-secondary">No links yet. <a href="/">Shorten one</a>.</p>
+    return;
+}
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Link</th>
+                <th>Long URL</th>
+                <th class="text-end">Clicks</th>
+                <th>Created</th>
+                @if (all)
+                {
+                    <th>Creator</th>
+                    <th></th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var link in Model.Links.Items)
+            {
+                <tr class="@(link.IsDisabled ? "table-secondary" : "")">
+                    <td class="text-nowrap">
+                        <a href="@Model.ShortUrl(link)" target="_blank" rel="noopener">/@link.ShortUrl</a>
+                        @if (link.SecretKey != "")
+                        {
+                            <span class="badge text-bg-secondary">secret</span>
+                        }
+                        @if (link.IsDisabled)
+                        {
+                            <span class="badge text-bg-warning">disabled</span>
+                        }
+                    </td>
+                    <td class="long-url">
+                        <details>
+                            <summary class="text-truncate" title="@link.LongUrl">@link.LongUrl</summary>
+                            <form method="post" asp-page-handler="EditLink" asp-all-route-data="Model.State" class="d-flex gap-2 mt-2">
+                                <input type="hidden" name="ending" value="@link.ShortUrl">
+                                <input type="url" name="longUrl" value="@link.LongUrl" class="form-control form-control-sm" required aria-label="New long URL">
+                                <button class="btn btn-sm btn-primary">Save</button>
+                            </form>
+                        </details>
+                    </td>
+                    <td class="text-end text-nowrap">
+                        @link.Clicks
+                        @if (Options.AdvancedAnalytics)
+                        {
+                            <a href="/admin/stats/@link.ShortUrl" class="ms-1 small">stats</a>
+                        }
+                    </td>
+                    <td class="text-nowrap">@link.CreatedAt?.ToString("yyyy-MM-dd")</td>
+                    @if (all)
+                    {
+                        <td>@link.Creator</td>
+                        <td class="text-nowrap text-end">
+                            <form method="post" asp-page-handler="ToggleLink" asp-all-route-data="Model.State" class="d-inline">
+                                <input type="hidden" name="ending" value="@link.ShortUrl">
+                                <button class="btn btn-sm @(link.IsDisabled ? "btn-outline-success" : "btn-outline-warning")">@(link.IsDisabled ? "Enable" : "Disable")</button>
+                            </form>
+                            <form method="post" asp-page-handler="DeleteLink" asp-all-route-data="Model.State" class="d-inline" onsubmit="return confirm('Delete this link and its stats?')">
+                                <input type="hidden" name="ending" value="@link.ShortUrl">
+                                <button class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<partial name="_Pager" />

@@ -1,0 +1,10 @@
+@model Polr.Pages.Admin.IndexModel
+
+@if (Model.PageCount > 1)
+{
+    <nav aria-label="Pages" class="d-flex align-items-center gap-3">
+        <a class="btn btn-sm btn-outline-secondary @(Model.PageNumber <= 1 ? "disabled" : "")" href="@Model.PageLink(Model.PageNumber - 1)">Previous</a>
+        <span class="small text-body-secondary">Page @Model.PageNumber of @Model.PageCount</span>
+        <a class="btn btn-sm btn-outline-secondary @(Model.PageNumber >= Model.PageCount ? "disabled" : "")" href="@Model.PageLink(Model.PageNumber + 1)">Next</a>
+    </nav>
+}
