@@ -18,8 +18,8 @@
                     @foreach (var row in rows)
                     {
                         <tr>
-                            <td class="w-50 text-break">@row.Label</td>
-                            <td><div class="progress" style="height: .5rem"><div class="progress-bar" style="width: @(row.Clicks * 100 / max)%"></div></div></td>
+                            <td class="text-break" style="width: 40%">@row.Label</td>
+                            <td style="width: 45%"><div class="progress" style="height: .5rem"><div class="progress-bar" style="width: @(row.Clicks * 100 / max)%"></div></div></td>
                             <td class="text-end">@row.Clicks</td>
                         </tr>
                     }

@@ -8,6 +8,18 @@
 A fast, self-hosted URL shortener for .NET 10 and MySQL. Create short, branded links on your own
 domain, see who clicks them, and manage everything from a simple dashboard or a REST API.
 
+## See it in action
+
+![Polr.NET walkthrough: sign in, shorten a link, get a QR code, manage links and view click stats](docs/images/polrnet-demo.gif)
+
+1. **Sign in**, or let visitors shorten links without an account (`PublicInterface`).
+2. **Paste a long URL** and press **Shorten**. Under **More options** you can pick a custom ending
+   (check that it is free with **Check**) or make the link secret.
+3. **Share the short link**: copy it, open it, or let people scan the QR code.
+4. **Manage your links** in the **Dashboard**: change where a link points, and as an admin disable or
+   delete links and manage users and API keys.
+5. **Check the stats** for any link: clicks per day, countries and referrers (turn on `AdvancedAnalytics`).
+
 ## Why use it
 
 - **Own your links and data.** Links and click stats stay on your server, not with a third-party
@@ -31,7 +43,8 @@ domain, see who clicks them, and manage everything from a simple dashboard or a 
 
 ## Features
 
-- Short links with custom endings, counter-based endings (`5kq`) or random endings (`aZ3kd`).
+- Short links with random endings that can't be guessed (`aZ3kdQ`), custom endings (`/launch`),
+  or optional sequential endings (`5kq`).
 - Secret links that only open with an extra key in the URL.
 - A QR code for every new short link.
 - Click counts, plus optional per-click analytics: clicks per day, countries (MaxMind GeoLite2) and referrers.
@@ -96,13 +109,13 @@ with environment variables, using `__` for nesting: `PolrNet__AllowSignup=true`,
 | `AutoApiKey` | `false` | Give new users an API key. |
 | `AnonymousApi` | `false` | Allow API calls without a key. |
 | `AnonymousApiQuota` | `5` | Links per minute per IP for anonymous API calls. |
-| `RandomEndings` | `false` | Random endings instead of counter-based ones. |
-| `RandomEndingLength` | `5` | Length of random endings. |
-| `EndingBase` | `32` | `32` (lowercase) or `62` (mixed case) for counter-based endings. |
+| `RandomEndings` | `true` | Random endings that can't be guessed. `false` gives shorter sequential endings (`1`, `2`, … `5kq`), but anyone can then walk through every link. |
+| `RandomEndingLength` | `6` | Length of random endings (6 characters ≈ 57 billion combinations). |
+| `EndingBase` | `32` | `32` (lowercase) or `62` (mixed case) for sequential endings. |
 | `AdvancedAnalytics` | `false` | Record each click and enable the stats pages. |
 | `AnalyticsMaxDays` | `365` | Longest date range for stats. |
 | `GeoIpDatabasePath` | | Path to `GeoLite2-Country.mmdb` for click countries. |
-| `SecretKeyBytes` | `2` | Size of secret link keys (shown as hex). |
+| `SecretKeyBytes` | `8` | Size of secret link keys (shown as hex, so 8 bytes = 16 characters). |
 | `ApiKeyBytes` | `15` | Size of API keys (shown as hex). |
 | `LinkCacheSeconds` | `60` | How long a link stays cached. Edits reach other instances within this time. |
 | `ClickFlushMilliseconds` | `1000` | How often buffered clicks are written to MySQL. |
@@ -169,6 +182,8 @@ Polr API clients keep working.
 Things that work differently in Polr.NET:
 
 - Setup happens through configuration instead of a web wizard.
+- New links get random endings. Set `RandomEndings: false` to keep sequential ones.
+- Secret link keys are longer (`SecretKeyBytes: 8`). Existing secret links keep their keys.
 - Long URLs must be `http` or `https`.
 - Endings are case-sensitive (useful with `EndingBase: 62`).
 - Disabled links answer `410 Gone`; other errors use proper status codes.
