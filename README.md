@@ -2,8 +2,34 @@
 
 [![CI](https://github.com/szeeshanali/polr-dotnet/actions/workflows/ci.yml/badge.svg)](https://github.com/szeeshanali/polr-dotnet/actions/workflows/ci.yml)
 [![License: GPL v2+](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)](LICENSE)
+[![.NET 10](https://img.shields.io/badge/.NET-10-512BD4.svg)](https://dotnet.microsoft.com)
+[![MySQL](https://img.shields.io/badge/MySQL-8-4479A1.svg)](https://www.mysql.com)
 
-A fast, self-hosted link shortener for .NET 10 and MySQL.
+A fast, self-hosted URL shortener for .NET 10 and MySQL. Create short, branded links on your own
+domain, see who clicks them, and manage everything from a simple dashboard or a REST API.
+
+## Why use it
+
+- **Own your links and data.** Links and click stats stay on your server, not with a third-party
+  shortener. No ads, no tracking scripts, no links that expire when a free plan ends.
+- **Branded short links.** Use your own domain (`go.example.com/launch`) instead of a generic one,
+  so people can see where a link comes from.
+- **Know what works.** See clicks per day, countries and referrers for every link, so you can tell
+  which campaign, post or email actually brought visitors.
+- **Built for teams.** User accounts, admin and user roles, per-user API keys and quotas, and the
+  option to turn off public sign-up for a private, internal shortener.
+- **Easy for developers.** A small REST API that answers in JSON or plain text, and works with
+  existing Polr client libraries.
+- **Cheap to run, easy to scale.** One small container plus MySQL. The app keeps no server-side
+  state, so you can add instances behind a load balancer when traffic grows.
+
+## Who it's for
+
+- **Businesses and creators** who want branded, trustworthy links in social posts, ads, QR codes and print.
+- **Marketing teams** who need to track which channel or campaign drives traffic.
+- **Developers** who need to create short links from their own apps, bots or scripts.
+- **Companies with privacy or compliance rules** that require link data to stay in-house.
+- **Current Polr users** who want a maintained, faster backend without losing their links.
 
 ## Features
 
