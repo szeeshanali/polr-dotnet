@@ -20,8 +20,8 @@ Thanks for helping! Bug reports, fixes, docs and features are all welcome.
 - **Keep it simple.** Polr.NET aims to stay small and easy to read. Prefer plain code over new abstractions,
   and discuss new dependencies in an issue first.
 - **Match the surrounding code**: naming, comments and layout.
-- **Keep the API compatible** with Polr API v2 (see [docs/API.md](docs/API.md)). Clients rely on it.
-- **Schema changes** go in a new `src/Polr/Data/Sql/NNN_description.sql` file. Never edit a script that has already shipped.
+- **Keep the API backwards compatible** (see [docs/API.md](docs/API.md)). Clients rely on it.
+- **Schema changes** go in a new `src/PolrNet/Data/Sql/NNN_description.sql` file. Never edit a script that has already shipped.
 - **Add tests** for bug fixes and new behaviour. Pure logic goes in `RulesTests`; anything touching MySQL or HTTP goes in the integration tests.
 - The build treats warnings as errors, so fix them before pushing.
 

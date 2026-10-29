@@ -2,7 +2,7 @@
 --
 -- 1. Back up your database first:   mysqldump polr > polr-backup.sql
 -- 2. Run this script once:          mysql polr < docs/upgrade-from-polr.sql
--- 3. Point ConnectionStrings:Polr at the database and start Polr.NET.
+-- 3. Point ConnectionStrings:PolrNet at the database and start Polr.NET.
 --
 -- Links, users (including their passwords), API keys and click stats are all kept.
 

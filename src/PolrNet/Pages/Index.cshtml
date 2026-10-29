@@ -1,0 +1,88 @@
+@page
+@model IndexModel
+@{
+    var features = new[]
+    {
+        ("bi-globe2", "Your own domain", $"Short, branded links on {new Uri(Options.BaseUrl).Host} that people recognise."),
+        ("bi-bar-chart-line", "Click insights", Options.AdvancedAnalytics ? "Clicks per day, countries and referrers for every link." : "See how often each of your links is clicked."),
+        ("bi-code-slash", "Developer API", "Create links from your own apps with a simple REST API."),
+    };
+}
+
+<section class="hero text-center mb-4">
+    <span class="badge rounded-pill bg-body border text-body-secondary fw-normal px-3 py-2 mb-3">
+        <i class="bi bi-lightning-charge-fill text-brand"></i> Fast, private link shortening
+    </span>
+    <h1 class="hero-title display-5 fw-bold mb-3">Shorten links. <span>See who clicks.</span></h1>
+    <p class="lead text-body-secondary mx-auto mb-0" style="max-width: 36rem">
+        Turn long URLs into short links you can share anywhere.
+    </p>
+</section>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        @if (Model.ShortUrl is not null)
+        {
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4 d-flex flex-column flex-sm-row align-items-center gap-4">
+                    <div class="qr p-2 bg-white rounded-3 border" data-qr="@Model.ShortUrl"></div>
+                    <div class="flex-grow-1 w-100">
+                        <p class="small text-body-secondary mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i>Your short link is ready</p>
+                        <div class="input-group input-group-lg">
+                            <input id="short-url" class="form-control fw-semibold" value="@Model.ShortUrl" readonly aria-label="Short link">
+                            <button class="btn btn-primary" type="button" data-copy="#short-url"><i class="bi bi-clipboard me-1"></i>Copy</button>
+                        </div>
+                        <a href="@Model.ShortUrl" target="_blank" rel="noopener" class="small d-inline-block mt-2">Open link <i class="bi bi-box-arrow-up-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <form method="post" class="shorten card border-0 shadow p-2">
+            <label asp-for="LongUrl" class="visually-hidden">Long URL</label>
+            <div class="input-group input-group-lg">
+                <span class="input-group-text bg-transparent border-0 text-body-secondary"><i class="bi bi-link-45deg"></i></span>
+                <input asp-for="LongUrl" type="url" class="form-control border-0" placeholder="Paste a long URL" required autofocus>
+                <button class="btn btn-primary rounded-3 px-4">Shorten</button>
+            </div>
+
+            <details class="px-3 pb-2">
+                <summary class="small text-body-secondary mt-2">More options</summary>
+                <div class="mt-3">
+                    <label asp-for="CustomEnding" class="form-label small">Custom ending (optional)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">@Options.BaseUrl/</span>
+                        <input asp-for="CustomEnding" class="form-control" pattern="[A-Za-z0-9_\-]+" title="Letters, numbers, hyphens and underscores">
+                        <button class="btn btn-outline-primary" type="button" id="check-ending">Check</button>
+                    </div>
+                    <div id="ending-status" class="form-text"></div>
+
+                    <div class="form-check mt-3">
+                        <input asp-for="Secret" class="form-check-input">
+                        <label asp-for="Secret" class="form-check-label small">Secret link (only opens with an extra key in the URL)</label>
+                    </div>
+                </div>
+            </details>
+        </form>
+
+        <div class="row g-3 mt-4">
+            @foreach (var (icon, title, text) in features)
+            {
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 p-3">
+                        <span class="feature-icon mb-2"><i class="bi @icon"></i></span>
+                        <h2 class="h6 mb-1">@title</h2>
+                        <p class="small text-body-secondary mb-0">@text</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @if (Model.ShortUrl is not null)
+    {
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    }
+}

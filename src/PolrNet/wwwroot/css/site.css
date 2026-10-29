@@ -1,0 +1,176 @@
+/* Polr.NET theme: Bootstrap 5 with an indigo accent, softer corners and a few custom pieces.
+   The Bootstrap overrides apply to <body class="theme"> only, so PolrNet:Stylesheet can replace them. */
+
+:root {
+  --brand: #4f46e5;
+  --brand-hover: #4338ca;
+  --brand-rgb: 79, 70, 229;
+  --brand-soft: #eef2ff;
+  --brand-gradient: linear-gradient(135deg, #4f46e5, #9333ea);
+}
+
+[data-bs-theme="dark"] {
+  --brand: #6366f1;
+  --brand-hover: #818cf8;
+  --brand-rgb: 99, 102, 241;
+  --brand-soft: rgba(99, 102, 241, .15);
+}
+
+/* Bootstrap overrides */
+
+.theme {
+  --bs-primary: var(--brand);
+  --bs-primary-rgb: var(--brand-rgb);
+  --bs-link-color: var(--brand);
+  --bs-link-color-rgb: var(--brand-rgb);
+  --bs-link-hover-color: var(--brand-hover);
+  --bs-border-radius: .6rem;
+  --bs-border-radius-lg: .9rem;
+  background: var(--bs-tertiary-bg);
+}
+
+[data-bs-theme="dark"] .theme {
+  --bs-link-color: #a5b4fc;
+  --bs-link-color-rgb: 165, 180, 252;
+  --bs-link-hover-color: #c7d2fe;
+}
+
+.theme .btn-primary {
+  --bs-btn-bg: var(--brand);
+  --bs-btn-border-color: var(--brand);
+  --bs-btn-hover-bg: var(--brand-hover);
+  --bs-btn-hover-border-color: var(--brand-hover);
+  --bs-btn-active-bg: var(--brand-hover);
+  --bs-btn-active-border-color: var(--brand-hover);
+  --bs-btn-disabled-bg: var(--brand);
+  --bs-btn-disabled-border-color: var(--brand);
+  --bs-btn-focus-shadow-rgb: var(--brand-rgb);
+}
+
+.theme .btn-outline-primary {
+  --bs-btn-color: var(--brand);
+  --bs-btn-border-color: var(--brand);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--brand);
+  --bs-btn-hover-border-color: var(--brand);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--brand-hover);
+  --bs-btn-active-border-color: var(--brand-hover);
+  --bs-btn-focus-shadow-rgb: var(--brand-rgb);
+}
+
+.theme .nav-pills {
+  --bs-nav-pills-link-active-bg: var(--brand);
+}
+
+.theme .nav-pills .nav-link:not(.active) {
+  color: var(--bs-body-color);
+}
+
+.theme .nav-pills .nav-link:not(.active):hover {
+  background: var(--brand-soft);
+}
+
+.theme .progress {
+  --bs-progress-bar-bg: var(--brand);
+}
+
+.theme .form-control:focus,
+.theme .form-select:focus {
+  border-color: rgba(var(--brand-rgb), .6);
+  box-shadow: 0 0 0 .25rem rgba(var(--brand-rgb), .2);
+}
+
+.theme .form-check-input:checked {
+  background-color: var(--brand);
+  border-color: var(--brand);
+}
+
+/* Polr.NET pieces */
+
+.text-brand {
+  color: var(--brand) !important;
+}
+
+.logo {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: .6rem;
+  background: var(--brand-gradient);
+  color: #fff;
+  font-size: 1.25rem;
+}
+
+.logo-lg {
+  width: 3rem;
+  height: 3rem;
+  border-radius: .9rem;
+  font-size: 1.9rem;
+}
+
+.hero {
+  padding: 3rem 1rem 2rem;
+  border-radius: 1.5rem;
+  background: radial-gradient(ellipse at top, rgba(var(--brand-rgb), .18), transparent 70%);
+}
+
+.hero-title span {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.shorten {
+  border-radius: 1rem;
+}
+
+.shorten .form-control:focus {
+  box-shadow: none;
+}
+
+.feature-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: .7rem;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 1.25rem;
+}
+
+summary {
+  cursor: pointer;
+}
+
+details > summary.btn {
+  list-style: none;
+}
+
+details > summary.btn::-webkit-details-marker {
+  display: none;
+}
+
+.long-url {
+  max-width: 28rem;
+}
+
+.long-url summary {
+  display: block;
+}
+
+.quota {
+  width: 5.5rem;
+}
+
+.api-cell {
+  min-width: 16rem;
+}
+
+.qr img,
+.qr canvas {
+  display: block;
+}

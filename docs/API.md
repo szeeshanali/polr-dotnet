@@ -1,6 +1,6 @@
-# Polr API v2
+# Polr.NET API (v2)
 
-The API is compatible with Polr API v2, so existing Polr client libraries work unchanged.
+The API keeps the Polr 2.x API format, so existing Polr client libraries work with Polr.NET unchanged.
 
 All endpoints live under `/api/v2/`. Arguments can be sent in the query string, as a form body
 (`application/x-www-form-urlencoded`) or as a JSON body (`application/json`).
@@ -10,7 +10,7 @@ All endpoints live under `/api/v2/`. Arguments can be sent in the query string, 
 Send your API key as the `key` argument with every request, for example `?key=YOUR_KEY`.
 
 An admin turns on API access for a user in **Dashboard → Users**. The user then finds their key
-in **Dashboard → API**. If `Polr:AnonymousApi` is on, requests without a key are allowed and are
+in **Dashboard → API**. If `PolrNet:AnonymousApi` is on, requests without a key are allowed and are
 limited per IP address.
 
 ## Quotas
@@ -101,11 +101,11 @@ Plain text returns the long URL. JSON returns:
 }
 ```
 
-The date format is kept for compatibility with existing Polr clients.
+The date format is kept for compatibility with existing API clients.
 
 ### `GET|POST /api/v2/data/link`
 
-Click analytics for one link. Needs an API key (no anonymous access) and `Polr:AdvancedAnalytics`
+Click analytics for one link. Needs an API key (no anonymous access) and `PolrNet:AdvancedAnalytics`
 turned on. Regular users can only read their own links; admins can read any link.
 
 | Argument | Required | Description |
@@ -115,7 +115,7 @@ turned on. Regular users can only read their own links; admins can read any link
 | `left_bound` | no | Start date, e.g. `2026-02-28 22:41:43`. Defaults to now. |
 | `right_bound` | no | End date. Defaults to now. |
 
-The range may cover at most `Polr:AnalyticsMaxDays` days (365 by default).
+The range may cover at most `PolrNet:AnalyticsMaxDays` days (365 by default).
 
 ```json
 {

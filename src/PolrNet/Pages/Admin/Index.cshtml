@@ -1,0 +1,83 @@
+@page "/admin"
+@model PolrNet.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var tabs = new List<(string Id, string Label, string Icon)> { ("links", "My links", "bi-link-45deg") };
+    if (Model.Me.IsAdmin)
+    {
+        tabs.Add(("all-links", "All links", "bi-collection"));
+        tabs.Add(("users", "Users", "bi-people"));
+    }
+    tabs.Add(("settings", "Settings", "bi-gear"));
+    tabs.Add(("api", "API", "bi-code-slash"));
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-0">Dashboard</h1>
+        <p class="small text-body-secondary mb-0">Signed in as @Model.Me.Username@(Model.Me.IsAdmin ? " · admin" : "")</p>
+    </div>
+    <a href="/" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New link</a>
+</div>
+
+<ul class="nav nav-pills gap-1 mb-4 flex-nowrap overflow-auto">
+    @foreach (var (id, label, icon) in tabs)
+    {
+        <li class="nav-item">
+            <a class="nav-link text-nowrap @(Model.Tab == id ? "active" : "")" href="?tab=@id"><i class="bi @icon me-1"></i>@label</a>
+        </li>
+    }
+</ul>
+
+@switch (Model.Tab)
+{
+    case "links":
+    case "all-links":
+        <partial name="_Links" />
+        break;
+
+    case "users":
+        <partial name="_Users" />
+        break;
+
+    case "settings":
+        <h2 class="h5">Change password</h2>
+        <form method="post" asp-page-handler="ChangePassword" asp-all-route-data="Model.State" class="card card-body border-0 shadow-sm p-4" style="max-width: 28rem">
+            <div class="mb-3">
+                <label for="currentPassword" class="form-label">Current password</label>
+                <input id="currentPassword" name="currentPassword" type="password" class="form-control" autocomplete="current-password" required>
+            </div>
+            <div class="mb-3">
+                <label for="newPassword" class="form-label">New password</label>
+                <input id="newPassword" name="newPassword" type="password" class="form-control" autocomplete="new-password" minlength="8" required>
+            </div>
+            <button class="btn btn-primary">Change password</button>
+        </form>
+        break;
+
+    case "api":
+        <h2 class="h5">API access</h2>
+        @if (Model.Me.ApiActive)
+        {
+            @if (Model.Me.ApiKey is { Length: > 0 } apiKey)
+            {
+                <div class="input-group mb-3" style="max-width: 32rem">
+                    <input id="api-key" class="form-control font-monospace" value="@apiKey" readonly aria-label="Your API key">
+                    <button class="btn btn-outline-primary" type="button" data-copy="#api-key">Copy</button>
+                </div>
+            }
+            <p>Quota: @(Model.Me.ApiQuota < 0 ? "unlimited" : $"{Model.Me.ApiQuota} links per minute").</p>
+            <form method="post" asp-page-handler="NewApiKey" asp-all-route-data="Model.State" class="mb-4">
+                <input type="hidden" name="id" value="@Model.Me.Id">
+                <button class="btn btn-outline-secondary">@(Model.Me.ApiKey is { Length: > 0 } ? "Generate a new key" : "Generate a key")</button>
+            </form>
+            <p class="mb-1">Example:</p>
+            <pre class="bg-body-tertiary p-3 rounded small"><code>curl "@Options.BaseUrl/api/v2/action/shorten?key=YOUR_KEY&url=https://example.com"</code></pre>
+            <p>See the <a href="https://github.com/szeeshanali/polr-dotnet/blob/main/docs/API.md">API documentation</a> for all endpoints.</p>
+        }
+        else
+        {
+            <p class="text-body-secondary">API access is not turned on for your account. Ask an administrator to turn it on.</p>
+        }
+        break;
+}

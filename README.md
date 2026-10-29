@@ -18,8 +18,7 @@ domain, see who clicks them, and manage everything from a simple dashboard or a 
   which campaign, post or email actually brought visitors.
 - **Built for teams.** User accounts, admin and user roles, per-user API keys and quotas, and the
   option to turn off public sign-up for a private, internal shortener.
-- **Easy for developers.** A small REST API that answers in JSON or plain text, and works with
-  existing Polr client libraries.
+- **Easy for developers.** A small REST API with API keys and per-user quotas that answers in JSON or plain text.
 - **Cheap to run, easy to scale.** One small container plus MySQL. The app keeps no server-side
   state, so you can add instances behind a load balancer when traffic grows.
 
@@ -29,19 +28,19 @@ domain, see who clicks them, and manage everything from a simple dashboard or a 
 - **Marketing teams** who need to track which channel or campaign drives traffic.
 - **Developers** who need to create short links from their own apps, bots or scripts.
 - **Companies with privacy or compliance rules** that require link data to stay in-house.
-- **Current Polr users** who want a maintained, faster backend without losing their links.
 
 ## Features
 
 - Short links with custom endings, counter-based endings (`5kq`) or random endings (`aZ3kd`).
 - Secret links that only open with an extra key in the URL.
+- A QR code for every new short link.
 - Click counts, plus optional per-click analytics: clicks per day, countries (MaxMind GeoLite2) and referrers.
 - User accounts: sign-up (optional), email activation, password reset, reCAPTCHA, email domain allow-list.
 - Admin dashboard to manage links (edit, disable, delete) and users (roles, API access, quotas).
-- [Polr API v2](docs/API.md), compatible with existing Polr client libraries.
-- Works with existing Polr databases, so a Polr install can move over with its links and users.
+- A [REST API](docs/API.md) with API keys and per-user quotas.
 - Built for speed: redirects come from an in-memory cache and clicks are written in batches in the background.
 - Stateless app, so you can run several instances behind a load balancer.
+- Light and dark mode.
 
 ## Quick start with Docker
 
@@ -59,16 +58,16 @@ Change the passwords in `docker-compose.yml` before putting it online.
 You need the [.NET 10 SDK](https://dotnet.microsoft.com/download) and MySQL 8 (or MariaDB 10.11+).
 
 ```sql
-CREATE DATABASE polr;
-CREATE USER 'polr'@'%' IDENTIFIED BY 'polr';
-GRANT ALL ON polr.* TO 'polr'@'%';
+CREATE DATABASE polrnet;
+CREATE USER 'polrnet'@'%' IDENTIFIED BY 'polrnet';
+GRANT ALL ON polrnet.* TO 'polrnet'@'%';
 ```
 
 ```bash
-cd src/Polr
-dotnet user-secrets set "ConnectionStrings:Polr" "Server=localhost;Database=polr;User ID=polr;Password=polr"
-dotnet user-secrets set "Polr:Admin:Username" "admin"
-dotnet user-secrets set "Polr:Admin:Password" "change-me-please"
+cd src/PolrNet
+dotnet user-secrets set "ConnectionStrings:PolrNet" "Server=localhost;Database=polrnet;User ID=polrnet;Password=polrnet"
+dotnet user-secrets set "PolrNet:Admin:Username" "admin"
+dotnet user-secrets set "PolrNet:Admin:Password" "change-me-please"
 dotnet run
 ```
 
@@ -77,40 +76,40 @@ In development, emails that would be sent (activation, password reset) are writt
 
 ## Configuration
 
-Settings live in [`appsettings.json`](src/Polr/appsettings.json) under `Polr`. Override any of them
-with environment variables, using `__` for nesting: `Polr__AllowSignup=true`, `Polr__Smtp__Host=smtp.example.com`.
+Settings live in [`appsettings.json`](src/PolrNet/appsettings.json) under `PolrNet`. Override any of them
+with environment variables, using `__` for nesting: `PolrNet__AllowSignup=true`, `PolrNet__Smtp__Host=smtp.example.com`.
 
-| Setting | Default | Polr `.env` | What it does |
-|---|---|---|---|
-| `ConnectionStrings:Polr` | local MySQL | `DB_*` | MySQL connection string. |
-| `AppName` | `Polr` | `APP_NAME` | Name shown in the interface and emails. |
-| `BaseUrl` | `http://localhost:8080` | `APP_PROTOCOL` + `APP_ADDRESS` | Public address used to build short links. |
-| `Stylesheet` | Bootstrap 5 | `APP_STYLESHEET` | Bootstrap 5 stylesheet URL, e.g. a [Bootswatch](https://bootswatch.com) theme. |
-| `PublicInterface` | `true` | `SETTING_PUBLIC_INTERFACE` | Show the shorten form to visitors who are not signed in. |
-| `IndexRedirect` | | `SETTING_INDEX_REDIRECT` | Where anonymous visitors of `/` go when the public interface is off. |
-| `Redirect404` | `false` | `SETTING_REDIRECT_404` | Send unknown and disabled links to `IndexRedirect`. |
-| `ShortenRequiresLogin` | `false` | `SETTING_SHORTEN_PERMISSION` | Only signed-in users can shorten from the web form. |
-| `AllowSignup` | `false` | `POLR_ALLOW_ACCT_CREATION` | Let visitors create accounts. |
-| `RequireEmailActivation` | `false` | `POLR_ACCT_ACTIVATION` | New accounts must confirm their email. |
-| `PasswordRecovery` | `false` | `SETTING_PASSWORD_RECOV` | Allow password resets by email. |
-| `AllowedEmailDomains` | `[]` | `SETTING_ALLOWED_EMAIL_DOMAINS` | When set, only these email domains can sign up. |
-| `AutoApiKey` | `false` | `SETTING_AUTO_API` | Give new users an API key. |
-| `AnonymousApi` | `false` | `SETTING_ANON_API` | Allow API calls without a key. |
-| `AnonymousApiQuota` | `5` | `SETTING_ANON_API_QUOTA` | Links per minute per IP for anonymous API calls. |
-| `RandomEndings` | `false` | `SETTING_PSEUDORANDOM_ENDING` | Random endings instead of counter-based ones. |
-| `RandomEndingLength` | `5` | `_PSEUDO_RANDOM_KEY_LENGTH` | Length of random endings. |
-| `EndingBase` | `32` | `POLR_BASE` | `32` (lowercase) or `62` (mixed case) for counter-based endings. |
-| `AdvancedAnalytics` | `false` | `SETTING_ADV_ANALYTICS` | Record each click and enable the stats pages. |
-| `AnalyticsMaxDays` | `365` | `_ANALYTICS_MAX_DAYS_DIFF` | Longest date range for stats. |
-| `GeoIpDatabasePath` | | `MAXMIND_LICENSE_KEY` | Path to `GeoLite2-Country.mmdb` for click countries. |
-| `SecretKeyBytes` | `2` | `POLR_SECRET_BYTES` | Size of secret link keys (shown as hex). |
-| `ApiKeyBytes` | `15` | `_API_KEY_LENGTH` | Size of API keys (shown as hex). |
-| `LinkCacheSeconds` | `60` | | How long a link stays cached. Edits reach other instances within this time. |
-| `ClickFlushMilliseconds` | `1000` | | How often buffered clicks are written to MySQL. |
-| `DataProtectionKeysPath` | | | Folder for sign-in cookie keys. Share it between instances. |
-| `Admin:Username` / `Email` / `Password` | | | Admin account created on first start if it does not exist. |
-| `Smtp:Host` / `Port` / `Username` / `Password` / `FromAddress` / `FromName` | | `MAIL_*` | SMTP server for activation and reset emails. |
-| `Recaptcha:SiteKey` / `SecretKey` | | `POLR_RECAPTCHA_*` | Turns on reCAPTCHA for sign-up when both are set. |
+| Setting | Default | What it does |
+|---|---|---|
+| `ConnectionStrings:PolrNet` | local MySQL | MySQL connection string. |
+| `AppName` | `Polr.NET` | Name shown in the interface and emails. |
+| `BaseUrl` | `http://localhost:8080` | Public address used to build short links. |
+| `Stylesheet` | Polr.NET theme | Bootstrap 5 stylesheet URL to use instead, e.g. a [Bootswatch](https://bootswatch.com) theme. |
+| `PublicInterface` | `true` | Show the shorten form to visitors who are not signed in. |
+| `IndexRedirect` | | Where anonymous visitors of `/` go when the public interface is off. |
+| `Redirect404` | `false` | Send unknown and disabled links to `IndexRedirect`. |
+| `ShortenRequiresLogin` | `false` | Only signed-in users can shorten from the web form. |
+| `AllowSignup` | `false` | Let visitors create accounts. |
+| `RequireEmailActivation` | `false` | New accounts must confirm their email. |
+| `PasswordRecovery` | `false` | Allow password resets by email. |
+| `AllowedEmailDomains` | `[]` | When set, only these email domains can sign up. |
+| `AutoApiKey` | `false` | Give new users an API key. |
+| `AnonymousApi` | `false` | Allow API calls without a key. |
+| `AnonymousApiQuota` | `5` | Links per minute per IP for anonymous API calls. |
+| `RandomEndings` | `false` | Random endings instead of counter-based ones. |
+| `RandomEndingLength` | `5` | Length of random endings. |
+| `EndingBase` | `32` | `32` (lowercase) or `62` (mixed case) for counter-based endings. |
+| `AdvancedAnalytics` | `false` | Record each click and enable the stats pages. |
+| `AnalyticsMaxDays` | `365` | Longest date range for stats. |
+| `GeoIpDatabasePath` | | Path to `GeoLite2-Country.mmdb` for click countries. |
+| `SecretKeyBytes` | `2` | Size of secret link keys (shown as hex). |
+| `ApiKeyBytes` | `15` | Size of API keys (shown as hex). |
+| `LinkCacheSeconds` | `60` | How long a link stays cached. Edits reach other instances within this time. |
+| `ClickFlushMilliseconds` | `1000` | How often buffered clicks are written to MySQL. |
+| `DataProtectionKeysPath` | | Folder for sign-in cookie keys. Share it between instances. |
+| `Admin:Username` / `Email` / `Password` | | Admin account created on first start if it does not exist. |
+| `Smtp:Host` / `Port` / `Username` / `Password` / `FromAddress` / `FromName` | | SMTP server for activation and reset emails. |
+| `Recaptcha:SiteKey` / `SecretKey` | | Turns on reCAPTCHA for sign-up when both are set. |
 
 **Behind a reverse proxy** (nginx, Caddy, Traefik, a cloud load balancer), set
 `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` so Polr.NET sees the real client IP and scheme.
@@ -118,23 +117,6 @@ with environment variables, using `__` for nesting: `Polr__AllowSignup=true`, `P
 **Country stats** need the free [MaxMind GeoLite2 Country](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data)
 database. Download it (or keep it updated with [geoipupdate](https://github.com/maxmind/geoipupdate))
 and set `GeoIpDatabasePath`.
-
-## Moving from Polr
-
-1. Back up your Polr database.
-2. Run [`docs/upgrade-from-polr.sql`](docs/upgrade-from-polr.sql) on it once.
-3. Copy your `.env` settings to Polr.NET using the table above, and point `ConnectionStrings:Polr` at the database.
-4. Start Polr.NET. Links, users, passwords, API keys and stats carry over, and short URLs stay the same.
-
-Differences from Polr:
-
-- Setup happens through configuration instead of a web wizard.
-- Long URLs must be `http` or `https`.
-- Endings are case-sensitive (useful with `EndingBase: 62`).
-- Disabled links answer `410 Gone`; other errors use proper status codes.
-- New passwords need at least 8 characters.
-- The password reset form no longer reveals whether an email has an account.
-- The admin tables are paged on the server; the world map on the stats page is replaced by a country list.
 
 ## How it works
 
@@ -147,15 +129,52 @@ Differences from Polr:
   Share `DataProtectionKeysPath` between instances.
 
 ```
-src/Polr/
+src/PolrNet/
   Program.cs          app setup and routes
-  PolrOptions.cs      all settings
+  PolrNetOptions.cs   all settings
   Data/               MySQL access (Dapper) and the schema in Data/Sql
   Services/           link creation, click recording, email, validation rules
   Endpoints/          redirects and the public API
   Pages/              the web interface (Razor Pages)
-tests/Polr.Tests/     unit tests and integration tests against MySQL
+  wwwroot/            stylesheet and scripts
+tests/PolrNet.Tests/  unit tests and integration tests against MySQL
 ```
+
+## Moving from Polr 2.x
+
+Polr.NET can take over the database of an existing [Polr](https://github.com/cydrobolt/polr) 2.x install.
+Links, users, passwords, API keys and stats carry over, short URLs stay the same, and existing
+Polr API clients keep working.
+
+1. Back up the database.
+2. Run [`docs/upgrade-from-polr.sql`](docs/upgrade-from-polr.sql) on it once.
+3. Point `ConnectionStrings:PolrNet` at the database and carry your old `.env` settings over:
+
+   | Old `.env` | Polr.NET setting |
+   |---|---|
+   | `APP_NAME`, `APP_STYLESHEET` | `AppName`, `Stylesheet` |
+   | `APP_PROTOCOL` + `APP_ADDRESS` | `BaseUrl` |
+   | `SETTING_PUBLIC_INTERFACE`, `SETTING_INDEX_REDIRECT`, `SETTING_REDIRECT_404` | `PublicInterface`, `IndexRedirect`, `Redirect404` |
+   | `SETTING_SHORTEN_PERMISSION` | `ShortenRequiresLogin` |
+   | `POLR_ALLOW_ACCT_CREATION`, `POLR_ACCT_ACTIVATION` | `AllowSignup`, `RequireEmailActivation` |
+   | `SETTING_PASSWORD_RECOV`, `SETTING_ALLOWED_EMAIL_DOMAINS` | `PasswordRecovery`, `AllowedEmailDomains` |
+   | `SETTING_AUTO_API`, `SETTING_ANON_API`, `SETTING_ANON_API_QUOTA` | `AutoApiKey`, `AnonymousApi`, `AnonymousApiQuota` |
+   | `SETTING_PSEUDORANDOM_ENDING`, `_PSEUDO_RANDOM_KEY_LENGTH`, `POLR_BASE` | `RandomEndings`, `RandomEndingLength`, `EndingBase` |
+   | `SETTING_ADV_ANALYTICS`, `_ANALYTICS_MAX_DAYS_DIFF` | `AdvancedAnalytics`, `AnalyticsMaxDays` |
+   | `POLR_SECRET_BYTES`, `_API_KEY_LENGTH` | `SecretKeyBytes`, `ApiKeyBytes` |
+   | `MAIL_*`, `POLR_RECAPTCHA_*` | `Smtp:*`, `Recaptcha:*` |
+
+4. Start Polr.NET.
+
+Things that work differently in Polr.NET:
+
+- Setup happens through configuration instead of a web wizard.
+- Long URLs must be `http` or `https`.
+- Endings are case-sensitive (useful with `EndingBase: 62`).
+- Disabled links answer `410 Gone`; other errors use proper status codes.
+- New passwords need at least 8 characters.
+- The password reset form does not reveal whether an email has an account.
+- The admin tables are paged on the server, and the stats page lists countries instead of drawing a map.
 
 ## Development
 

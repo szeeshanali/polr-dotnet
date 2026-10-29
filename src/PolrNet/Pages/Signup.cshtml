@@ -1,0 +1,42 @@
+@page "/signup"
+@model SignupModel
+@{
+    ViewData["Title"] = "Sign up";
+}
+
+<div class="row justify-content-center">
+    <div class="col-sm-10 col-md-6 col-lg-4">
+        <div class="text-center mb-4">
+            <span class="logo logo-lg"><i class="bi bi-link-45deg"></i></span>
+            <h1 class="h4 mt-3 mb-1">Create your account</h1>
+            <p class="small text-body-secondary mb-0">Shorten, share and track your links.</p>
+        </div>
+        <form method="post" class="card card-body border-0 shadow-sm p-4">
+            <div class="mb-3">
+                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control" autocomplete="username" pattern="[A-Za-z0-9_\-]+" title="Letters, numbers, hyphens and underscores" required autofocus>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" type="email" class="form-control" autocomplete="email" required>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" type="password" class="form-control" autocomplete="new-password" minlength="8" required>
+            </div>
+            @if (Options.Recaptcha.Enabled)
+            {
+                <div class="g-recaptcha mb-3" data-sitekey="@Options.Recaptcha.SiteKey"></div>
+            }
+            <button class="btn btn-primary w-100">Sign up</button>
+        </form>
+        <p class="mt-3 small text-center">Already have an account? <a href="/login">Sign in</a></p>
+    </div>
+</div>
+
+@section Scripts {
+    @if (Options.Recaptcha.Enabled)
+    {
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    }
+}
